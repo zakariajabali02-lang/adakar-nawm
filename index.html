@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <meta name="description" content="أذكار النوم - تطبيق أنيق للأذكار قبل النوم" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>أذكار النوم</title>
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --bg-card: rgba(255, 255, 255, 0.06);
+      --bg-card-hover: rgba(255, 255, 255, 0.1);
+      --text: #f0f0f5;
+      --text-secondary: #a0a0b0;
+      --accent: #7c5cfc;
+      --accent2: #a78bfa;
+      --success: #34d399;
+      --border: rgba(255, 255, 255, 0.08);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --radius: 20px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 26, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 16px 20px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #7c5cfc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .header-btn:active {
+      transform: scale(0.92);
+      background: var(--bg-card-hover);
+    }
+
+    /* List */
+    .list {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      animation: fadeUp 0.5s ease backwards;
+    }
+
+    .card:active {
+      transform: scale(0.97);
+      background: var(--bg-card-hover);
+    }
+
+    .card-number {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c5cfc, #a78bfa);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 4px 15px rgba(124, 92, 252, 0.4);
+    }
+
+    .card-content {
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .card-ref {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .card-arrow {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    /* Detail View */
+    .detail {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 200;
+      flex-direction: column;
+      animation: slideIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .detail.active {
+      display: flex;
+    }
+
+    .detail-header {
+      padding: 16px 20px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .detail-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .arabic-text {
+      font-size: 1.45rem;
+      line-height: 2.1;
+      text-align: center;
+      font-weight: 500;
+      max-width: 600px;
+    }
+
+    .translation {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.6;
+      max-width: 500px;
+      display: none;
+    }
+
+    .translation.show {
+      display: block;
+    }
+
+    .counter-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .counter-value {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #7c5cfc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: all 0.2s ease;
+    }
+
+    .counter-total {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+
+    .counter-btn {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #7c5cfc, #a78bfa);
+      color: white;
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 40px rgba(124, 92, 252, 0.45);
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      margin-top: 10px;
+    }
+
+    .counter-btn:active {
+      transform: scale(0.92);
+    }
+
+    .counter-btn.done {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      box-shadow: 0 10px 40px rgba(52, 211, 153, 0.4);
+    }
+
+    .reference {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* Settings */
+    .settings {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 300;
+      flex-direction: column;
+      animation: slideIn 0.35s ease;
+    }
+
+    .settings.active {
+      display: flex;
+    }
+
+    .settings-body {
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .setting-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .setting-label {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .toggle {
+      width: 52px;
+      height: 30px;
+      background: #333;
+      border-radius: 30px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle.on {
+      background: var(--accent);
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      right: 3px;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .toggle.on::after {
+      transform: translateX(-22px);
+    }
+
+    .about {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .about-title {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .about-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #7c5cfc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .about-sub {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.15s; }
+    .card:nth-child(4) { animation-delay: 0.2s; }
+    .card:nth-child(5) { animation-delay: 0.25s; }
+    .card:nth-child(6) { animation-delay: 0.3s; }
+    .card:nth-child(7) { animation-delay: 0.35s; }
+    .card:nth-child(8) { animation-delay: 0.4s; }
+    .card:nth-child(9) { animation-delay: 0.45s; }
+    .card:nth-child(10) { animation-delay: 0.5s; }
+  </style>
+</head>
+<body>
+  <!-- Home -->
+  <div id="home">
+    <div class="header">
+      <h1>أذكار النوم</h1>
+      <button class="header-btn" onclick="openSettings()">⚙️</button>
+    </div>
+    <div class="list" id="adhkarList"></div>
+  </div>
+
+  <!-- Detail -->
+  <div class="detail" id="detailView">
+    <div class="detail-header">
+      <button class="header-btn" onclick="closeDetail()">✕</button>
+      <div class="detail-title" id="detailTitle"></div>
+      <div style="width:42px"></div>
+    </div>
+    <div class="detail-body">
+      <div class="arabic-text" id="arabicText"></div>
+      <div class="translation" id="translationText"></div>
+      <div class="counter-section">
+        <div class="counter-value" id="counterValue">0</div>
+        <div class="counter-total" id="counterTotal"></div>
+        <button class="counter-btn" id="counterBtn" onclick="incrementCounter()">اضغط</button>
+        <div class="reference" id="referenceText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings" id="settingsView">
+    <div class="detail-header">
+      <button class="header-btn" onclick="closeSettings()">✕</button>
+      <div class="detail-title">الإعدادات</div>
+      <div style="width:42px"></div>
+    </div>
+    <div class="settings-body">
+      <div class="setting-item">
+        <span class="setting-label">إظهار الترجمة الفرنسية</span>
+        <div class="toggle" id="toggleTranslation" onclick="toggleSetting('showTranslation')"></div>
+      </div>
+      <div class="setting-item">
+        <span class="setting-label">الأرقام العربية (١٢٣)</span>
+        <div class="toggle on" id="toggleEastern" onclick="toggleSetting('useEastern')"></div>
+      </div>
+      <div class="setting-item">
+        <span class="setting-label">إظهار الأذكار الاختيارية</span>
+        <div class="toggle" id="toggleOptional" onclick="toggleSetting('showOptional')"></div>
+      </div>
+
+      <div class="about">
+        <div class="about-title">صُنِعَت بواسطة</div>
+        <div class="about-name">زكريا جبلي</div>
+        <div class="about-sub">Zakaria Jabali</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const adhkarList = [
+      {
+        title: "المعوذات الثلاث",
+        arabic: `بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ
+
+بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِن شَرِّ مَا خَلَقَ ۝ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ
+
+بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ`,
+        translation: "Réciter 3 fois en soufflant dans les mains puis en passant sur le corps.",
+        count: 3,
+        reference: "حصن المسلم ٩٩",
+        optional: false
+      },
+      {
+        title: "آية الكرسي",
+        arabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+        translation: "Allah ! Il n’y a de divinité que Lui, le Vivant, Celui qui subsiste par Lui-même...",
+        count: 1,
+        reference: "حصن المسلم ١٠٠",
+        optional: false
+      },
+      {
+        title: "خواتيم سورة البقرة",
+        arabic: `آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ ۚ وَقَالُوا سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ
+
+لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنتَ مَوْلَانَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ`,
+        translation: "Le Messager a cru en ce qui lui a été descendu de la part de son Seigneur...",
+        count: 1,
+        reference: "حصن المسلم ١٠١",
+        optional: false
+      },
+      {
+        title: "باسمك ربي وضعت جنبي",
+        arabic: "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ",
+        translation: "En Ton nom, mon Seigneur, je m’allonge et par Toi je me lève...",
+        count: 1,
+        reference: "حصن المسلم",
+        optional: false
+      },
+      {
+        title: "اللهم أسلمت نفسي إليك",
+        arabic: "اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَوَجَّهْتُ وَجْهِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِي أَنْزَلْتَ وَبِنَبِيِّكَ الَّذِي أَرْسَلْتَ",
+        translation: "Ô Allah, je me soumets à Toi, je confie mon affaire à Toi...",
+        count: 1,
+        reference: "حصن المسلم",
+        optional: false
+      },
+      {
+        title: "باسمك اللهم أموت وأحيا",
+        arabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
+        translation: "En Ton nom, ô Allah, je meurs et je vis.",
+        count: 1,
+        reference: "البخاري",
+        optional: false
+      },
+      {
+        title: "اللهم قني عذابك",
+        arabic: "اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ",
+        translation: "Ô Allah, préserve-moi de Ton châtiment le Jour où Tu ressusciteras Tes serviteurs.",
+        count: 3,
+        reference: "حصن المسلم",
+        optional: false
+      },
+      {
+        title: "التسبيح قبل النوم",
+        arabic: "سُبْحَانَ اللَّهِ\nالْحَمْدُ لِلَّهِ\nاللَّهُ أَكْبَرُ",
+        translation: "SubhanAllah (33) – Alhamdulillah (33) – Allahu Akbar (34)",
+        count: 100,
+        reference: "البخاري ومسلم",
+        optional: false
+      },
+      {
+        title: "اللهم رب السماوات",
+        arabic: "اللَّهُمَّ رَبَّ السَّمَاوَاتِ السَّبْعِ وَرَبَّ الْعَرْشِ الْعَظِيمِ، رَبَّنَا وَرَبَّ كُلِّ شَيْءٍ، فَالِقَ الْحَبِّ وَالنَّوَى، وَمُنْزِلَ التَّوْرَاةِ وَالْإِنْجِيلِ وَالْفُرْقَانِ، أَعُوذُ بِكَ مِنْ شَرِّ كُلِّ شَيْءٍ أَنْتَ آخِذٌ بِنَاصِيَتِهِ. اللَّهُمَّ أَنْتَ الْأَوَّلُ فَلَيْسَ قَبْلَكَ شَيْءٌ، وَأَنْتَ الْآخِرُ فَلَيْسَ بَعْدَكَ شَيْءٌ، وَأَنْتَ الظَّاهِرُ فَلَيْسَ فَوْقَكَ شَيْءٌ، وَأَنْتَ الْبَاطِنُ فَلَيْسَ دُونَكَ شَيْءٌ، اقْضِ عَنَّا الدَّيْنَ وَأَغْنِنَا مِنَ الْفَقْرِ",
+        translation: "Ô Allah, Seigneur des sept cieux et du Trône immense...",
+        count: 1,
+        reference: "مسلم",
+        optional: false
+      },
+      {
+        title: "سورة الملك",
+        arabic: "تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ\n\n(يُنصح بقراءة السورة كاملة قبل النوم)",
+        translation: "Sourate Al-Mulk (recommandée avant de dormir)",
+        count: 1,
+        reference: "مستحب",
+        optional: true
+      }
+    ];
+
+    // Settings
+    let settings = {
+      showTranslation: false,
+      useEastern: true,
+      showOptional: false
+    };
+
+    let currentAdhkar = null;
+    let currentCount = 0;
+
+    // Load settings
+    function loadSettings() {
+      const saved = localStorage.getItem("adhkarSettings");
+      if (saved) settings = JSON.parse(saved);
+      updateToggles();
+    }
+
+    function saveSettings() {
+      localStorage.setItem("adhkarSettings", JSON.stringify(settings));
+    }
+
+    function updateToggles() {
+      document.getElementById("toggleTranslation").classList.toggle("on", settings.showTranslation);
+      document.getElementById("toggleEastern").classList.toggle("on", settings.useEastern);
+      document.getElementById("toggleOptional").classList.toggle("on", settings.showOptional);
+    }
+
+    function toggleSetting(key) {
+      settings[key] = !settings[key];
+      saveSettings();
+      updateToggles();
+      if (key === "showOptional") renderList();
+      if (currentAdhkar) updateDetailUI();
+    }
+
+    // Eastern numerals
+    function toEastern(num) {
+      if (!settings.useEastern) return String(num);
+      const map = "٠١٢٣٤٥٦٧٨٩";
+      return String(num).replace(/\d/g, d => map[d]);
+    }
+
+    // Render list
+    function renderList() {
+      const container = document.getElementById("adhkarList");
+      container.innerHTML = "";
+      const list = adhkarList.filter(a => settings.showOptional || !a.optional);
+      
+      list.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.onclick = () => openDetail(item);
+        card.innerHTML = `
+          <div class="card-number">${toEastern(index + 1)}</div>
+          <div class="card-content">
+            <div class="card-title">${item.title}</div>
+            <div class="card-ref">${item.reference}</div>
+          </div>
+          <div class="card-arrow">‹</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Detail
+    function openDetail(item) {
+      currentAdhkar = item;
+      currentCount = 0;
+      document.getElementById("detailView").classList.add("active");
+      updateDetailUI();
+    }
+
+    function closeDetail() {
+      document.getElementById("detailView").classList.remove("active");
+      currentAdhkar = null;
+    }
+
+    function updateDetailUI() {
+      if (!currentAdhkar) return;
+      document.getElementById("detailTitle").textContent = currentAdhkar.title;
+      document.getElementById("arabicText").textContent = currentAdhkar.arabic;
+      document.getElementById("referenceText").textContent = currentAdhkar.reference;
+      
+      const translationEl = document.getElementById("translationText");
+      translationEl.textContent = currentAdhkar.translation || "";
+      translationEl.classList.toggle("show", settings.showTranslation && currentAdhkar.translation);
+      
+      document.getElementById("counterValue").textContent = toEastern(currentCount);
+      document.getElementById("counterTotal").textContent = `/ ${toEastern(currentAdhkar.count)}`;
+      
+      const btn = document.getElementById("counterBtn");
+      if (currentCount >= currentAdhkar.count) {
+        btn.textContent = "تمّ ✓";
+        btn.classList.add("done");
+      } else {
+        btn.textContent = "اضغط";
+        btn.classList.remove("done");
+      }
+    }
+
+    function incrementCounter() {
+      if (!currentAdhkar || currentCount >= currentAdhkar.count) return;
+      currentCount++;
+      const valueEl = document.getElementById("counterValue");
+      valueEl.style.transform = "scale(1.15)";
+      setTimeout(() => valueEl.style.transform = "scale(1)", 150);
+      updateDetailUI();
+      
+      // Haptic feedback if available
+      if (navigator.vibrate) navigator.vibrate(15);
+    }
+
+    // Settings
+    function openSettings() {
+      document.getElementById("settingsView").classList.add("active");
+    }
+
+    function closeSettings() {
+      document.getElementById("settingsView").classList.remove("active");
+    }
+
+    // Init
+    loadSettings();
+    renderList();
+
+    // Prevent zoom on double tap
+    document.addEventListener("gesturestart", e => e.preventDefault());
+  </script>
+</body>
+</html>
