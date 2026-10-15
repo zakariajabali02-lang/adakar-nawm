@@ -1,0 +1,16 @@
+workflows:
+  github-pages:
+    name: GitHub Pages
+    max_build_duration: 60
+    environment:
+      node: latest
+    scripts:
+      - name: Deploy to GitHub Pages
+        script: |
+          git config --global user.name "Codemagic"
+          git config --global user.email "ci@codemagic.io"
+          git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$PROJECT_REPO.git
+          git checkout -B gh-pages
+          git add -f .
+          git commit -m "Build artifacts"
+          git push -f origin gh-pages
